@@ -4,7 +4,7 @@
 
 - Tên nhóm: solobolo
 - Repository URL: https://github.com/Horaise/Day13_2A202601277_ChuHoangViet
-- Commit SHA cuối: <Điền_commit_sha_mới_nhất>
+- Commit SHA cuối: 6f46386
 - Thành viên và vai trò:
   - Chu Hoàng Việt: Full-stack Observability (Logging, PII, Tracing, Dashboard, Challenge Investigation)
 
@@ -13,13 +13,15 @@
 - Điểm `validate_logs.py`: 100/100
 - Tổng số traces: 40
 - Số PII leak còn lại: 0
-- Link/đường dẫn dashboard: `data/logs.jsonl` 
+- Link/đường dẫn dashboard: `data/logs.jsonl`
 
 ## 3. Logging và tracing
 
-- Evidence correlation ID: `submission/evidence/pii_redacted_log_sample.json` (Correlation ID định dạng `req-<8hex>`)
+- Evidence correlation ID: `submission/evidence/cp1_redacted_log_sample.json` (Log JSON có correlation ID dạng `req-<8hex>`)
 - Evidence PII redaction: Đã redact thành công Email, Phone VN, CCCD, Credit Card, Passport, Address VN thành `[REDACTED_...]`
-- Evidence trace waterfall: Screenshot tại `submission/evidence/trace_waterfall.png`
+- Evidence validation log: `submission/evidence/cp1_validation.png` (Kết quả chạy `validate_logs.py` đạt 100/100)
+- Evidence traces list: `submission/evidence/cp2_10_traces.png` (Danh sách các traces ghi nhận trên Langfuse)
+- Evidence trace waterfall: `submission/evidence/cp2_waterfall.png` (Waterfall span chuẩn của một request)
 - Giải thích một span đáng chú ý: Span `run` đại diện cho toàn bộ luồng xử lý của Agent, bên dưới gồm sub-span `retrieve` (truy xuất dữ liệu RAG) và sub-span `generate` (sinh văn bản LLM).
 
 ## 4. Prompt versioning
@@ -28,14 +30,14 @@
 - Version/label baseline: v1 / `production`
 - Version/label candidate: v2 / `staging`
 - Trace ID của mỗi version: 
-  - Trace ID v1: `req-055e3d86`
-  - Trace ID v2: `req-2c6641b0`
-- Bằng chứng đổi label hoặc rollback: Screenshot trong `submission/evidence/prompt_rollback.png`
+  - Trace ID v1: `req-6d648514`
+  - Trace ID v2: `req-b8e0d9c9`
+- Bằng chứng quản lý prompt & rollback: `submission/evidence/cp3_prompt.png`
 
 ## 5. Dashboard, SLO và alerts
 
 - Kết quả `validate_dashboard.py`: HỢP LỆ (6/6 panel)
-- Evidence dashboard: Screenshot trong `submission/evidence/dashboard_runtime.png`
+- Evidence dashboard: `submission/evidence/cp3_dashboard.png`
 - SLO đã chọn và lý do:
   - `latency_p95_ms`: < 3000ms (Đảm bảo trải nghiệm thời gian thực cho người dùng)
   - `error_rate_pct`: < 2.0% (Giữ hệ thống ổn định và sẵn sàng)
@@ -47,11 +49,11 @@
 
 - Challenge ID: day13-k3-observability-v1
 - Triệu chứng từ metrics: 
-  - `latency_p95` tăng vọt bất thường lên tới ~18,073ms (vượt xa ngưỡng SLO 3000ms).
+  - `latency_p95` tăng vọt bất thường lên tới ~18,073ms (vượt xa ngưỡng SLO 3000ms) - Minh chứng tại `submission/evidence/cp3_metrics.png`.
   - `error_rate_pct` giữ ở mức 0.0% (tất cả request vẫn trả về HTTP 200 nhưng phản hồi cực kỳ chậm).
-- Trace ID liên quan: `req-41acf34e` (Metadata: `feature="refund"`, `model="claude-sonnet-4-5"`)
+- Trace ID liên quan: `req-41acf34e` (Metadata: `feature="refund"`, `model="claude-sonnet-4-5"`) - Minh chứng Waterfall lỗi tại `submission/evidence/cp3_waterfall.png`.
 - Log line/correlation ID liên quan: 
-  - Correlation ID: `req-41acf34e`
+  - Correlation ID: `req-41acf34e` (Minh chứng log lỗi tại `submission/evidence/cp3_logs.png`)
   - Log line: Event `response_sent` ghi nhận `latency_ms: 18073`, `payload.answer_preview` hợp lệ nhưng thời gian phản hồi kéo dài.
 - Root cause: Sự cố nghẽn dịch vụ RAG retrieval (`STATE["rag_slow"] = True`). Sub-span `retrieve` bị delay cố định 2.5s cộng dồn khi xử lý luồng đồng thời concurrency cao (5 workers).
 - Fix action: 
@@ -65,4 +67,4 @@
 
 | Thành viên | Phần việc | Commit/PR | Điều đã học |
 |---|---|---|---|
-| Chu Hoàng Việt | Triển khai Correlation ID, PII Scrubbing, Langfuse Tracing Sub-spans, Dashboard spec, Alert Runbook và Điều tra Challenge | Commit SHA `main` | Hiểu rõ quy trình observability 3 lớp Metrics -> Traces -> Logs để nhanh chóng khoanh vùng và xử lý sự cố hệ thống AI |
+| Chu Hoàng Việt | Triển khai Correlation ID, PII Scrubbing, Langfuse Tracing Sub-spans, Dashboard spec, Alert Runbook và Điều tra Challenge | Commit SHA `6f46386` | Hiểu rõ quy trình observability 3 lớp Metrics -> Traces -> Logs để nhanh chóng khoanh vùng và xử lý sự cố hệ thống AI |
